@@ -1,0 +1,18 @@
+<%- include('header', { title: title }) %>
+
+<div class="card">
+  <h1>Password Reset</h1>
+  <p class="subtitle">Enter your email address to receive a reset link.</p>
+
+  <% if (locals.message) { %>
+    <div class="alert alert-info"><%= message %></div>
+  <% } %>
+
+  <form method="POST" action="/reset/request">
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" placeholder="you@yourdomain.com" required autofocus>
+    <button type="submit">Send Reset Link</button>
+  </form>
+</div>
+
+<%- include('footer') %>

@@ -1,0 +1,22 @@
+<%- include('header', { title: title }) %>
+
+<div class="card">
+  <h1>Reset Password</h1>
+  <p class="subtitle">Enter your new password below for your email account. Minimum 8 characters.</p>
+
+  <% if (locals.error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="/reset/<%= token %>">
+    <label for="password">New password</label>
+    <input type="password" id="password" name="password" minlength="8" required autofocus>
+
+    <label for="confirmPassword">Confirm Password</label>
+    <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" required>
+
+    <button type="submit">Reset Password</button>
+  </form>
+</div>
+
+<%- include('footer') %>

@@ -1,0 +1,17 @@
+<%- include('header', { title: title }) %>
+
+<div class="card">
+  <% if (success) { %>
+    <div class="alert alert-success">
+      <strong>Success!</strong><br><%= message %>
+    </div>
+    <a href="/" class="btn">Back to Home</a>
+  <% } else { %>
+    <div class="alert alert-error">
+      <strong>Something went wrong</strong><br><%= message %>
+    </div>
+    <a href="/" class="btn">Request a new Reset Link</a>
+  <% } %>
+</div>
+
+<%- include('footer') %>
