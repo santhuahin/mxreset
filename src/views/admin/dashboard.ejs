@@ -1,0 +1,93 @@
+<%- include('../partials/header', { title: title }) %>
+
+<nav>
+  <a href="/admin" class="brand">MXReset Administration</a>
+  <a href="/admin/logout">Log out</a>
+</nav>
+
+<div class="card card-wide">
+
+  <% if (flash.success) { %>
+    <div class="alert alert-success"><%= flash.success %></div>
+  <% } %>
+  <% if (flash.error) { %>
+    <div class="alert alert-error"><%= flash.error %></div>
+  <% } %>
+
+  <% if (importSummary) { %>
+    <div class="alert <%= importSummary.failed.length > 0 ? 'alert-error' : 'alert-success' %>">
+      <strong>Import complete:</strong>
+      <%= importSummary.imported %> imported,
+      <%= importSummary.skipped %> skipped (duplicates),
+      <%= importSummary.failed.length %> failed.
+      <% if (importSummary.failed.length > 0) { %>
+        <ul class="failed-list">
+          <% importSummary.failed.forEach(function(f) { %>
+            <li>Row <%= f.row %>: <%= f.reason %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  <% } %>
+
+  <!-- Users table -->
+  <div class="section-title">Registered Users (<%= users.length %>)</div>
+  <% if (users.length === 0) { %>
+    <div class="empty-state">No users registered yet.</div>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Recovery Email</th>
+          <th>Added</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(user) { %>
+          <tr>
+            <td><%= user.email %></td>
+            <td><%= user.maskedRecoveryEmail %></td>
+            <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+            <td>
+              <form method="POST" action="/admin/users/<%= user.id %>/delete" style="display:inline"
+                    onsubmit="return confirm('Delete <%= user.email %>?')">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <hr>
+
+  <!-- Add single user -->
+  <div class="section-title">Add User</div>
+  <form method="POST" action="/admin/users">
+    <div class="form-row">
+      <input type="email" name="email" placeholder="Email (custom domain)" required>
+      <input type="email" name="recoveryEmail" placeholder="Recovery email" required>
+    </div>
+    <button type="submit">Add User</button>
+  </form>
+
+  <hr>
+
+  <!-- CSV bulk import -->
+  <div class="section-title">Bulk Import (CSV)</div>
+  <p class="subtitle">
+    Expected format: two columns — <code>email</code> and <code>recoveryEmail</code>.
+    Duplicate emails are skipped silently.
+  </p>
+  <form method="POST" action="/admin/users/import" enctype="multipart/form-data">
+    <label for="csvFile">Select CSV file</label>
+    <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+    <button type="submit">Import</button>
+  </form>
+
+</div>
+
+<%- include('../partials/footer') %>

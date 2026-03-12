@@ -1,0 +1,17 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="card">
+  <h1>MXReset Administration Login</h1>
+
+  <% if (locals.error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="/admin/login">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required autofocus>
+    <button type="submit">Log in</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>
