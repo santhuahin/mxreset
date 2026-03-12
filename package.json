@@ -1,0 +1,31 @@
+{
+  "name": "mxreset",
+  "version": "1.0.0",
+  "description": "Self-hosted Password Reset Portal for MXRoute Email Users",
+  "license": "ISC",
+  "author": "Hassan W. ElDessouki",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "bcrypt": "^5.1.1",
+    "connect-flash": "^0.1.1",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.4.1",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^8.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.0"
+  }
+}
