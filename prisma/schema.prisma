@@ -1,0 +1,26 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./data/db.sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  email         String       @unique
+  recoveryEmail String
+  createdAt     DateTime     @default(now())
+  tokens        ResetToken[]
+}
+
+model ResetToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  tokenHash String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
