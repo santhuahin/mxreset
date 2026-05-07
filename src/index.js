@@ -12,6 +12,10 @@ const adminRouter = require('./routes/admin')
 const app = express()
 const PORT = process.env.PORT || 3000
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1)
+}
+
 // Security headers — upgrade-insecure-requests is removed from CSP so the app
 // works over plain HTTP behind a TLS-terminating reverse proxy (e.g. Caddy)
 app.use(helmet({
