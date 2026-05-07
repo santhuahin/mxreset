@@ -61,14 +61,17 @@ Copy the output into `ADMIN_PASSWORD_HASH` in your `.env`.
 
 ### 6. Run the database migration
 
-On first run (or after schema changes):
+Create a PostgreSQL database, set `DATABASE_URL` in `.env`, then run the migration:
 
 ```bash
-mkdir -p data
-npx prisma migrate dev --name init
+npx prisma migrate dev
 ```
 
-This creates the SQLite database at `data/db.sqlite`.
+For production deploys, use:
+
+```bash
+npx prisma migrate deploy
+```
 
 ### 7. Start the server
 
@@ -95,19 +98,20 @@ docker run -d \
   --name mxreset \
   -p 3000:3000 \
   --env-file .env \
-  -v $(pwd)/data:/app/data \
   mxreset
 ```
 
-The `-v $(pwd)/data:/app/data` mount persists the SQLite database across container restarts.
+The container runs `prisma migrate deploy` before starting the server, so `DATABASE_URL` must point to a reachable PostgreSQL database.
 
-### Run the migration inside the container
+### Published image
 
-On first run, execute the migration:
+Pushing to `main`, `master`, or a `v*` tag builds and publishes a multi-architecture image to GitHub Container Registry:
 
 ```bash
-docker exec mxreset npx prisma migrate deploy
+docker pull ghcr.io/santhuahin/mxreset:latest
 ```
+
+If GitHub creates the package as private, change the package visibility to public in the repository's Packages settings.
 
 ---
 
@@ -118,6 +122,7 @@ docker exec mxreset npx prisma migrate deploy
 | `ADMIN_PASSWORD_HASH` | bcrypt hash of the admin password (cost factor 12 recommended) |
 | `SESSION_SECRET` | Long random string used to sign session cookies |
 | `ENCRYPTION_KEY` | Exactly 32 characters — used for AES-256-CBC encryption of recovery emails |
+| `DATABASE_URL` | PostgreSQL connection string used by Prisma |
 | `MXROUTE_API_KEY` | Your MXRoute API key |
 | `MXROUTE_SERVER` | Your MXRoute server identifier |
 | `MXROUTE_USERNAME` | Your MXRoute username |
