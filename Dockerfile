@@ -6,8 +6,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://user:password@localhost:5432/mxreset?schema=public" npx prisma generate
 
 EXPOSE 3000
 
-CMD ["node", "src/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]

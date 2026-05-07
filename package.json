@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node src/index.js",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate"
   },
   "dependencies": {
