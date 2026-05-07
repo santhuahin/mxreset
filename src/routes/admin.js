@@ -14,6 +14,7 @@ const upload = multer({ storage: multer.memoryStorage() })
 const loginAttempts = new Map()
 const MAX_ATTEMPTS = 5
 const LOCKOUT_MS = 15 * 60 * 1000 // 15 minutes
+const BCRYPT_HASH_PATTERN = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/
 
 function getClientIp(req) {
   return req.ip || req.connection.remoteAddress || 'unknown'
@@ -41,6 +42,33 @@ function recordFailedAttempt(ip) {
 
 function clearAttempts(ip) {
   loginAttempts.delete(ip)
+}
+
+function getAdminPasswordHash() {
+  const rawHash = process.env.ADMIN_PASSWORD_HASH
+  if (!rawHash) return null
+
+  let hash = rawHash.trim()
+  const first = hash[0]
+  const last = hash[hash.length - 1]
+
+  if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+    hash = hash.slice(1, -1)
+  }
+
+  // Some tools, especially PHP bcrypt generators, emit $2y$ hashes. The same
+  // hash data verifies with node bcrypt when treated as $2b$.
+  if (hash.startsWith('$2y$')) {
+    hash = `$2b$${hash.slice(4)}`
+  }
+
+  return hash
+}
+
+function getHashDiagnostic(hash) {
+  if (!hash) return 'missing'
+
+  return `prefix=${hash.slice(0, 4)}, length=${hash.length}, validFormat=${BCRYPT_HASH_PATTERN.test(hash)}`
 }
 
 function isValidEmail(email) {
@@ -72,7 +100,6 @@ router.get('/login', (req, res) => {
 // POST /admin/login
 router.post('/login', async (req, res) => {
   const ip = getClientIp(req)
-  console.log("REQUEST")
   if (isLockedOut(ip)) {
     req.flash('error', 'Too many failed attempts. Please try again later.')
     return res.redirect('/admin/login')
@@ -81,22 +108,34 @@ router.post('/login', async (req, res) => {
   const { password } = req.body
 
   try {
-    const hash = process.env.ADMIN_PASSWORD_HASH
+    const hash = getAdminPasswordHash()
+
+    if (!hash) {
+      console.error('Login error: ADMIN_PASSWORD_HASH is not configured.')
+    } else if (!BCRYPT_HASH_PATTERN.test(hash)) {
+      console.error(`Login error: ADMIN_PASSWORD_HASH does not look like a bcrypt hash (${getHashDiagnostic(hash)}).`)
+    }
+
     const match = hash && password ? await bcrypt.compare(password, hash) : false
 
     if (match) {
       clearAttempts(ip)
       req.session.admin = true
-      console.log("error")
-      return res.redirect('/admin')
+      return req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err.message)
+          req.flash('error', 'Login failed. Please try again.')
+          return res.redirect('/admin/login')
+        }
+
+        res.redirect('/admin')
+      })
     }
   } catch (err) {
-    console.log("error")
     console.error('Login error:', err.message)
   }
 
   recordFailedAttempt(ip)
-  console.log("error")
   req.flash('error', 'Invalid credentials.')
   res.redirect('/admin/login')
 })
