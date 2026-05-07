@@ -104,9 +104,11 @@ router.post('/reset/request', ipRateLimit, async (req, res) => {
       const recoveryEmail = decrypt(user.recoveryEmail)
       const resetLink = `${process.env.BASE_URL}/reset/${rawToken}`
 
+      const smtpFrom = process.env.SMTP_FROM
+
       const transporter = createTransporter()
       await transporter.sendMail({
-        from: "MXReset",
+        from: smtpFrom,
         to: recoveryEmail,
         subject: 'Password Reset Request',
         text: `You requested a password reset for ${email}.\n\nClick the link below to reset your password (valid for 15 minutes):\n\n${resetLink}\n\nIf you did not request this, you can safely ignore this email.`,
